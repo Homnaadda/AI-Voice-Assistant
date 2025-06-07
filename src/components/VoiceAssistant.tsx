@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -375,6 +375,54 @@ const VoiceAssistant = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02),transparent_70%)]" />
       
       <div className="relative z-10 flex flex-col h-screen">
+        {/* Slide-down conversation bar */}
+        {messages.length > 1 && (
+          <div 
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
+              showMessages 
+                ? 'translate-y-0' 
+                : '-translate-y-full'
+            }`}
+          >
+            <div className="bg-black/60 backdrop-blur-3xl border-b border-white/10">
+              {/* Handle bar */}
+              <div className="flex justify-center pt-2 pb-1">
+                <div className="w-12 h-1 bg-white/30 rounded-full"></div>
+              </div>
+              
+              {/* Header */}
+              <div className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium text-lg">Conversation</h3>
+                    <p className="text-white/60 text-sm">{messages.length - 1} messages</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMessages(false)}
+                  className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-300"
+                >
+                  <ChevronUp className="w-5 h-5" />
+                </Button>
+              </div>
+              
+              {/* Messages */}
+              <div className="px-6 pb-6 max-h-96 overflow-y-auto">
+                <div className="space-y-4">
+                  {messages.slice(1).map((message) => (
+                    <ChatMessage key={message.id} message={message} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Minimal iPhone-style header */}
         <div className="p-6 flex items-center justify-between backdrop-blur-sm">
           <div className="flex items-center gap-3">
@@ -409,16 +457,22 @@ const VoiceAssistant = () => {
               </Button>
             )}
             
+            {/* Conversation toggle button */}
             {messages.length > 1 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMessages(!showMessages)}
-                className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-3 transition-all duration-300"
+                className={`rounded-full p-3 transition-all duration-300 ${
+                  showMessages
+                    ? 'text-white bg-white/20 hover:bg-white/30'
+                    : 'text-white/60 hover:text-white hover:bg-white/10'
+                }`}
               >
-                <MessageSquare className="w-5 h-5" />
+                {showMessages ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </Button>
             )}
+            
             <Button
               variant="ghost"
               size="sm"
@@ -507,7 +561,7 @@ const VoiceAssistant = () => {
                 {isListening && (
                   <div className="flex items-center gap-4">
                     <div className="flex space-x-2">
-                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce\" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                       <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                       <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
@@ -564,30 +618,6 @@ const VoiceAssistant = () => {
             </div>
           </div>
         </div>
-
-        {/* Messages Panel with iPhone-style design */}
-        {showMessages && messages.length > 1 && (
-          <div className="backdrop-blur-3xl bg-black/30 border-t border-white/10 max-h-80 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-white/90 font-thin text-lg tracking-wide">Conversation</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowMessages(false)}
-                  className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-300"
-                >
-                  ×
-                </Button>
-              </div>
-              <div className="space-y-4 max-h-60 overflow-y-auto">
-                {messages.slice(1).map((message) => (
-                  <ChatMessage key={message.id} message={message} />
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
