@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import ChatMessage from './ChatMessage';
+import SiriWaveform from './SiriWaveform';
 
 interface Message {
   id: string;
@@ -20,7 +22,7 @@ const VoiceAssistant = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [elevenLabsKey, setElevenLabsKey] = useState('');
-  const [showKeyInput, setShowKeyInput] = useState(true);
+  const [showKeyInput, setShowKeyInput] = useState(false);
   
   const recognition = useRef<SpeechRecognition | null>(null);
   const synthesis = useRef<SpeechSynthesis | null>(null);
@@ -250,16 +252,16 @@ const VoiceAssistant = () => {
 
   if (showKeyInput) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <Card className="p-8 bg-white/10 backdrop-blur-lg border-white/20 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+        <Card className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl max-w-md w-full shadow-2xl">
           <div className="text-center space-y-6">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Volume2 className="w-8 h-8 text-white" />
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <Volume2 className="w-10 h-10 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2">AI Voice Assistant</h2>
-              <p className="text-gray-300 text-sm">
-                Enter your ElevenLabs API key for high-quality voice synthesis, or skip to use browser TTS.
+              <h2 className="text-3xl font-light text-white mb-2">AI Assistant</h2>
+              <p className="text-white/70 text-sm font-light">
+                Enter your ElevenLabs API key for premium voice synthesis
               </p>
             </div>
             <div className="space-y-4">
@@ -268,20 +270,20 @@ const VoiceAssistant = () => {
                 placeholder="ElevenLabs API Key (optional)"
                 value={elevenLabsKey}
                 onChange={(e) => setElevenLabsKey(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                className="bg-white/10 border-white/20 text-white placeholder-white/50 rounded-2xl backdrop-blur-sm"
               />
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button 
                   onClick={handleKeySubmit}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-2xl border-0 shadow-lg transition-all duration-300"
                   disabled={!elevenLabsKey.trim()}
                 >
-                  Connect ElevenLabs
+                  Connect
                 </Button>
                 <Button 
                   onClick={() => setShowKeyInput(false)}
                   variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-white/30 text-white hover:bg-white/10 rounded-2xl backdrop-blur-sm"
                 >
                   Skip
                 </Button>
@@ -294,90 +296,104 @@ const VoiceAssistant = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-white/10">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Volume2 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">AI Voice Assistant</h1>
-              <p className="text-sm text-gray-400">Powered by Qwen3 235B</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            {isSpeaking && (
-              <div className="flex items-center space-x-2 text-green-400">
-                <Volume2 className="w-4 h-4 animate-pulse" />
-                <span className="text-sm">Speaking...</span>
-              </div>
-            )}
-            {isProcessing && (
-              <div className="flex items-center space-x-2 text-blue-400">
-                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm">Thinking...</span>
-              </div>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+      {/* Background blur effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_70%)]" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      
+      <div className="relative z-10 flex flex-col h-screen">
+        {/* Header */}
+        <div className="p-6 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-2xl font-light text-white mb-1">AI Assistant</h1>
+            <p className="text-sm text-white/60 font-light">Powered by Qwen3 235B</p>
           </div>
         </div>
-      </div>
 
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-4">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
-        </div>
-      </div>
-
-      {/* Input Controls */}
-      <div className="p-6 border-t border-white/10">
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleTextSubmit} className="flex items-center space-x-4">
-            <Button
-              type="button"
-              onClick={isListening ? stopListening : startListening}
-              disabled={isProcessing || isSpeaking}
-              className={`w-12 h-12 rounded-full transition-all duration-300 ${
+        {/* Center Siri Interface */}
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-8 max-w-2xl w-full">
+            {/* Main Siri Circle */}
+            <div className="relative">
+              <div className={`w-32 h-32 mx-auto rounded-full transition-all duration-500 ${
                 isListening 
-                  ? 'bg-red-500 hover:bg-red-600 animate-pulse scale-110' 
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-105'
-              }`}
-            >
-              {isListening ? (
-                <MicOff className="w-5 h-5 text-white" />
-              ) : (
-                <Mic className="w-5 h-5 text-white" />
+                  ? 'bg-gradient-to-br from-blue-400 to-purple-500 scale-110 shadow-2xl shadow-blue-500/50' 
+                  : isProcessing
+                  ? 'bg-gradient-to-br from-purple-400 to-pink-500 scale-105 shadow-xl shadow-purple-500/30'
+                  : isSpeaking
+                  ? 'bg-gradient-to-br from-green-400 to-blue-500 scale-105 shadow-xl shadow-green-500/30'
+                  : 'bg-gradient-to-br from-gray-400 to-gray-600 hover:scale-105 shadow-lg'
+              } flex items-center justify-center cursor-pointer backdrop-blur-sm border border-white/20`}
+              onClick={isListening ? stopListening : startListening}
+              >
+                {isListening ? (
+                  <MicOff className="w-12 h-12 text-white" />
+                ) : (
+                  <Mic className="w-12 h-12 text-white" />
+                )}
+              </div>
+              
+              {/* Animated Waveform */}
+              {(isListening || isProcessing || isSpeaking) && (
+                <SiriWaveform 
+                  isActive={isListening || isProcessing || isSpeaking}
+                  type={isListening ? 'listening' : isProcessing ? 'processing' : 'speaking'}
+                />
               )}
-            </Button>
-            
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Type your message or use voice input..."
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                disabled={isProcessing || isSpeaking}
-                className="bg-white/10 border-white/20 text-white placeholder-gray-400 backdrop-blur-sm"
-              />
             </div>
-            
-            <Button
-              type="submit"
-              disabled={!textInput.trim() || isProcessing || isSpeaking}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-            >
-              Send
-            </Button>
-          </form>
-          
-          <p className="text-xs text-gray-400 text-center mt-3">
-            {isListening ? 'Listening... Speak now!' : 'Click the microphone to start voice input or type your message'}
-          </p>
+
+            {/* Status Text */}
+            <div className="text-center">
+              {isListening && (
+                <p className="text-white/80 text-lg font-light animate-pulse">Listening...</p>
+              )}
+              {isProcessing && (
+                <p className="text-white/80 text-lg font-light">Thinking...</p>
+              )}
+              {isSpeaking && (
+                <p className="text-white/80 text-lg font-light">Speaking...</p>
+              )}
+              {!isListening && !isProcessing && !isSpeaking && (
+                <p className="text-white/60 text-base font-light">Tap to speak or type below</p>
+              )}
+            </div>
+
+            {/* Text Input */}
+            <form onSubmit={handleTextSubmit} className="max-w-md mx-auto">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  disabled={isProcessing || isSpeaking}
+                  className="bg-white/10 border-white/20 text-white placeholder-white/50 rounded-2xl py-4 px-6 backdrop-blur-sm text-center focus:bg-white/15 transition-all duration-300"
+                />
+                {textInput && (
+                  <Button
+                    type="submit"
+                    disabled={!textInput.trim() || isProcessing || isSpeaking}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl px-4 py-2 text-sm"
+                  >
+                    Send
+                  </Button>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
+
+        {/* Messages Drawer */}
+        {messages.length > 1 && (
+          <div className="max-h-60 overflow-y-auto p-6 backdrop-blur-sm border-t border-white/10">
+            <div className="max-w-4xl mx-auto space-y-3">
+              {messages.slice(1).map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
