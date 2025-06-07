@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Image } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ const VoiceAssistant = () => {
   const [textInput, setTextInput] = useState('');
   const [elevenLabsKey, setElevenLabsKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   
   const recognition = useRef<SpeechRecognition | null>(null);
   const synthesis = useRef<SpeechSynthesis | null>(null);
@@ -65,7 +66,7 @@ const VoiceAssistant = () => {
     // Add welcome message
     const welcomeMessage: Message = {
       id: '1',
-      text: "Hello! I'm your AI voice assistant powered by Qwen3 235B. You can speak to me or type your questions. How can I help you today?",
+      text: "Hi there! I'm your AI assistant. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     };
@@ -293,10 +294,10 @@ const VoiceAssistant = () => {
 
   if (showKeyInput) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
-        <Card className="p-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl max-w-md w-full shadow-2xl">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+        <Card className="p-8 bg-black/20 backdrop-blur-2xl border-white/10 rounded-3xl max-w-md w-full shadow-2xl">
           <div className="text-center space-y-6">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl">
               <Volume2 className="w-10 h-10 text-white" />
             </div>
             <div>
@@ -316,7 +317,7 @@ const VoiceAssistant = () => {
               <div className="flex gap-3">
                 <Button 
                   onClick={handleKeySubmit}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-2xl border-0 shadow-lg transition-all duration-300"
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-2xl border-0 shadow-lg transition-all duration-300"
                   disabled={!elevenLabsKey.trim()}
                 >
                   Connect
@@ -337,101 +338,153 @@ const VoiceAssistant = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
-      {/* Background blur effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_70%)]" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Glassmorphism background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.15),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.15),transparent_50%)]" />
       
       <div className="relative z-10 flex flex-col h-screen">
-        {/* Header */}
-        <div className="p-6 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-2xl font-light text-white mb-1">AI Assistant</h1>
-            <p className="text-sm text-white/60 font-light">Powered by Qwen3 235B</p>
+        {/* Minimal Header */}
+        <div className="p-6 flex items-center justify-between backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-3 h-3 bg-white rounded-full" />
+            </div>
+            <h1 className="text-lg font-medium text-white/90">AI Assistant</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            {messages.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMessages(!showMessages)}
+                className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-2"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowKeyInput(true)}
+              className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-2"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
           </div>
         </div>
 
-        {/* Center Siri Interface */}
+        {/* Main Siri Interface */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center space-y-8 max-w-2xl w-full">
-            {/* Main Siri Circle */}
-            <div className="relative">
-              <div className={`w-32 h-32 mx-auto rounded-full transition-all duration-500 ${
-                isListening 
-                  ? 'bg-gradient-to-br from-blue-400 to-purple-500 scale-110 shadow-2xl shadow-blue-500/50' 
-                  : isProcessing
-                  ? 'bg-gradient-to-br from-purple-400 to-pink-500 scale-105 shadow-xl shadow-purple-500/30'
-                  : isSpeaking
-                  ? 'bg-gradient-to-br from-green-400 to-blue-500 scale-105 shadow-xl shadow-green-500/30'
-                  : 'bg-gradient-to-br from-gray-400 to-gray-600 hover:scale-105 shadow-lg'
-              } flex items-center justify-center cursor-pointer backdrop-blur-sm border border-white/20`}
-              onClick={isListening ? stopListening : startListening}
+          <div className="text-center space-y-12 max-w-lg w-full">
+            {/* Main Siri Orb */}
+            <div className="relative flex items-center justify-center">
+              <div 
+                className={`relative w-40 h-40 rounded-full transition-all duration-700 cursor-pointer ${
+                  isListening 
+                    ? 'bg-gradient-to-br from-blue-400/30 to-purple-500/30 scale-110 shadow-2xl shadow-blue-500/30' 
+                    : isProcessing
+                    ? 'bg-gradient-to-br from-purple-400/30 to-pink-500/30 scale-105 shadow-xl shadow-purple-500/20'
+                    : isSpeaking
+                    ? 'bg-gradient-to-br from-green-400/30 to-blue-500/30 scale-105 shadow-xl shadow-green-500/20'
+                    : 'bg-white/5 hover:bg-white/10 hover:scale-105 shadow-lg'
+                } backdrop-blur-xl border border-white/20`}
+                onClick={isListening ? stopListening : startListening}
               >
-                {isListening ? (
-                  <MicOff className="w-12 h-12 text-white" />
-                ) : (
-                  <Mic className="w-12 h-12 text-white" />
+                {/* Inner glow effect */}
+                <div className={`absolute inset-2 rounded-full transition-all duration-500 ${
+                  isListening || isProcessing || isSpeaking 
+                    ? 'bg-gradient-to-br from-white/20 to-white/5' 
+                    : 'bg-white/5'
+                } backdrop-blur-sm`} />
+                
+                {/* Icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {isListening ? (
+                    <div className="relative">
+                      <MicOff className="w-12 h-12 text-white drop-shadow-lg" />
+                      <div className="absolute inset-0 bg-red-500/20 rounded-full animate-pulse" />
+                    </div>
+                  ) : (
+                    <Mic className="w-12 h-12 text-white/90 drop-shadow-lg" />
+                  )}
+                </div>
+                
+                {/* Animated Waveform */}
+                {(isListening || isProcessing || isSpeaking) && (
+                  <div className="absolute inset-0">
+                    <SiriWaveform 
+                      isActive={isListening || isProcessing || isSpeaking}
+                      type={isListening ? 'listening' : isProcessing ? 'processing' : 'speaking'}
+                    />
+                  </div>
                 )}
               </div>
-              
-              {/* Animated Waveform */}
-              {(isListening || isProcessing || isSpeaking) && (
-                <SiriWaveform 
-                  isActive={isListening || isProcessing || isSpeaking}
-                  type={isListening ? 'listening' : isProcessing ? 'processing' : 'speaking'}
-                />
-              )}
             </div>
 
             {/* Status Text */}
-            <div className="text-center">
-              {isListening && (
-                <p className="text-white/80 text-lg font-light animate-pulse">Listening...</p>
-              )}
-              {isProcessing && (
-                <p className="text-white/80 text-lg font-light">Thinking...</p>
-              )}
-              {isSpeaking && (
-                <p className="text-white/80 text-lg font-light">Speaking...</p>
-              )}
-              {!isListening && !isProcessing && !isSpeaking && (
-                <p className="text-white/60 text-base font-light">Tap to speak or type below</p>
-              )}
-            </div>
-
-            {/* Text Input */}
-            <form onSubmit={handleTextSubmit} className="max-w-md mx-auto">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Type your message..."
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  disabled={isProcessing || isSpeaking}
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50 rounded-2xl py-4 px-6 backdrop-blur-sm text-center focus:bg-white/15 transition-all duration-300"
-                />
-                {textInput && (
-                  <Button
-                    type="submit"
-                    disabled={!textInput.trim() || isProcessing || isSpeaking}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl px-4 py-2 text-sm"
-                  >
-                    Send
-                  </Button>
+            <div className="space-y-4">
+              <div className="text-center min-h-[2rem]">
+                {isListening && (
+                  <p className="text-white text-xl font-light animate-pulse">Listening...</p>
+                )}
+                {isProcessing && (
+                  <p className="text-white/90 text-xl font-light">Thinking...</p>
+                )}
+                {isSpeaking && (
+                  <p className="text-white/90 text-xl font-light">Speaking...</p>
+                )}
+                {!isListening && !isProcessing && !isSpeaking && (
+                  <p className="text-white/60 text-lg font-light">Tap to speak or type below</p>
                 )}
               </div>
-            </form>
+
+              {/* Text Input */}
+              <form onSubmit={handleTextSubmit} className="max-w-sm mx-auto">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Ask me anything..."
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    disabled={isProcessing || isSpeaking}
+                    className="bg-white/10 border-white/20 text-white placeholder-white/50 rounded-full py-3 px-6 backdrop-blur-sm text-center focus:bg-white/15 focus:border-white/30 transition-all duration-300"
+                  />
+                  {textInput && (
+                    <Button
+                      type="submit"
+                      disabled={!textInput.trim() || isProcessing || isSpeaking}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full w-8 h-8 p-0 text-xs"
+                    >
+                      →
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </div>
           </div>
         </div>
 
-        {/* Messages Drawer */}
-        {messages.length > 1 && (
-          <div className="max-h-60 overflow-y-auto p-6 backdrop-blur-sm border-t border-white/10">
-            <div className="max-w-4xl mx-auto space-y-3">
-              {messages.slice(1).map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
+        {/* Messages Panel */}
+        {showMessages && messages.length > 1 && (
+          <div className="backdrop-blur-xl bg-black/20 border-t border-white/10 max-h-80 overflow-hidden">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white/90 font-medium">Conversation</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMessages(false)}
+                  className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1"
+                >
+                  ×
+                </Button>
+              </div>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {messages.slice(1).map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))}
+              </div>
             </div>
           </div>
         )}
