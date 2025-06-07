@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,11 +96,15 @@ const VoiceAssistant = () => {
     setIsProcessing(true);
 
     try {
-      const response = await fetch('https://api.openrouter.ai/api/v1/chat/completions', {
+      console.log('Making API request to OpenRouter...');
+      
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${QWEN_API_KEY}`,
           'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'AI Voice Assistant',
         },
         body: JSON.stringify({
           model: 'qwen/qwen-2.5-coder-32b-instruct',
@@ -120,12 +123,19 @@ const VoiceAssistant = () => {
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0]?.message?.content || 'Sorry, I could not process your request.';
+      console.log('API Response data:', data);
+      
+      const aiResponse = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -154,7 +164,7 @@ const VoiceAssistant = () => {
       setMessages(prev => [...prev, errorMessage]);
       toast({
         title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        description: `Failed to get AI response: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
