@@ -7,6 +7,7 @@ interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
+  imageUrl?: string;
 }
 
 interface ChatMessageProps {
@@ -45,6 +46,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-white/10 text-white mr-2'
         }`}>
           <p className="text-sm leading-relaxed whitespace-pre-wrap font-light">{message.text}</p>
+          
+          {/* Display image if present */}
+          {message.imageUrl && (
+            <div className="mt-3">
+              <img 
+                src={message.imageUrl} 
+                alt="Generated image" 
+                className="rounded-lg max-w-full h-auto shadow-md"
+                loading="lazy"
+              />
+            </div>
+          )}
+          
           <div className={`text-xs opacity-60 mt-1 font-light ${message.isUser ? 'text-right' : 'text-left'}`}>
             {formatTime(message.timestamp)}
           </div>

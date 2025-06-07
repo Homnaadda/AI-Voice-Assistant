@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +12,7 @@ interface Message {
   text: string;
   isUser: boolean;
   timestamp: Date;
+  imageUrl?: string;
 }
 
 const VoiceAssistant = () => {
@@ -86,6 +86,44 @@ const VoiceAssistant = () => {
     }
   };
 
+  const shouldGenerateImage = (text: string): boolean => {
+    const imageKeywords = [
+      'show me', 'picture of', 'image of', 'photo of', 'what does', 'look like',
+      'appearance', 'visual', 'see', 'draw', 'create image', 'generate image'
+    ];
+    return imageKeywords.some(keyword => text.toLowerCase().includes(keyword));
+  };
+
+  const generateImage = async (prompt: string): Promise<string | null> => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${QWEN_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: prompt,
+          n: 1,
+          size: '1024x1024',
+          quality: 'standard',
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Image generation failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.data[0]?.url || null;
+    } catch (error) {
+      console.error('Error generating image:', error);
+      return null;
+    }
+  };
+
   const handleUserMessage = async (text: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -125,9 +163,6 @@ const VoiceAssistant = () => {
         }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API Error Response:', errorText);
@@ -135,15 +170,21 @@ const VoiceAssistant = () => {
       }
 
       const data = await response.json();
-      console.log('API Response data:', data);
-      
       const aiResponse = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
+
+      // Check if we should generate an image
+      let imageUrl = null;
+      if (shouldGenerateImage(text)) {
+        console.log('Generating image for:', text);
+        imageUrl = await generateImage(text);
+      }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: aiResponse,
         isUser: false,
         timestamp: new Date(),
+        imageUrl,
       };
 
       setMessages(prev => [...prev, aiMessage]);
