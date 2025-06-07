@@ -17,12 +17,12 @@ const SiriWaveform: React.FC<SiriWaveformProps> = ({ isActive, type }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to match the orb
-    canvas.width = 320;
-    canvas.height = 320;
+    // Set canvas size to match the larger orb
+    canvas.width = 384;
+    canvas.height = 384;
 
     let time = 0;
-    const waves = 4;
+    const waves = type === 'listening' ? 6 : type === 'processing' ? 4 : 5;
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -34,35 +34,48 @@ const SiriWaveform: React.FC<SiriWaveformProps> = ({ isActive, type }) => {
 
       const centerY = canvas.height / 2;
       const centerX = canvas.width / 2;
-      const radius = 140;
+      const baseRadius = 160;
 
       for (let i = 0; i < waves; i++) {
         ctx.beginPath();
-        ctx.globalAlpha = 0.6 - (i * 0.1);
+        ctx.globalAlpha = 0.8 - (i * 0.12);
         
-        // Different wave patterns based on type
-        let amplitude = 15;
-        let frequency = 0.03;
-        let speed = 0.08;
+        // Enhanced wave patterns more like iPhone Siri
+        let amplitude = 20;
+        let frequency = 0.02;
+        let speed = 0.06;
+        let waveCount = 12;
         
         if (type === 'listening') {
-          amplitude = 25 + Math.sin(time * 0.05) * 10;
-          frequency = 0.04 + i * 0.002;
-          speed = 0.1;
+          amplitude = 35 + Math.sin(time * 0.04) * 15;
+          frequency = 0.025 + i * 0.001;
+          speed = 0.08;
+          waveCount = 16;
         } else if (type === 'processing') {
-          amplitude = 12 + Math.sin(time * 0.08 + i) * 8;
-          frequency = 0.05;
-          speed = 0.12;
+          amplitude = 18 + Math.sin(time * 0.06 + i) * 12;
+          frequency = 0.03;
+          speed = 0.1;
+          waveCount = 10;
         } else if (type === 'speaking') {
-          amplitude = 20 + Math.sin(time * 0.06 + i * 0.3) * 12;
-          frequency = 0.035;
-          speed = 0.09;
+          amplitude = 28 + Math.sin(time * 0.05 + i * 0.4) * 18;
+          frequency = 0.028;
+          speed = 0.07;
+          waveCount = 14;
         }
 
-        // Create circular waveform
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.02) {
-          const waveOffset = Math.sin(angle * 8 + time * speed + i * 0.5) * amplitude;
-          const currentRadius = radius + waveOffset;
+        // Create more iPhone Siri-like circular waveforms with multiple harmonics
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.015) {
+          // Primary wave
+          const primaryWave = Math.sin(angle * waveCount + time * speed + i * 0.7) * amplitude;
+          
+          // Secondary harmonic for more complexity
+          const secondaryWave = Math.sin(angle * (waveCount * 2) + time * speed * 1.5 + i) * (amplitude * 0.3);
+          
+          // Tertiary wave for iPhone Siri smoothness
+          const tertiaryWave = Math.sin(angle * (waveCount * 0.5) + time * speed * 0.8 + i * 1.2) * (amplitude * 0.2);
+          
+          const totalWave = primaryWave + secondaryWave + tertiaryWave;
+          const currentRadius = baseRadius + totalWave;
           
           const x = centerX + Math.cos(angle) * currentRadius;
           const y = centerY + Math.sin(angle) * currentRadius;
@@ -76,28 +89,45 @@ const SiriWaveform: React.FC<SiriWaveformProps> = ({ isActive, type }) => {
         
         ctx.closePath();
 
-        // Gradient colors based on type with Apple-like colors
-        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius + amplitude);
+        // Enhanced iPhone Siri-like gradients
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseRadius + amplitude);
+        
         if (type === 'listening') {
-          gradient.addColorStop(0, 'rgba(0, 122, 255, 0.8)');
-          gradient.addColorStop(0.5, 'rgba(88, 86, 214, 0.6)');
-          gradient.addColorStop(1, 'rgba(0, 122, 255, 0.2)');
+          // Blue spectrum like iPhone Siri when listening
+          gradient.addColorStop(0, `rgba(0, 122, 255, ${0.9 - i * 0.1})`);
+          gradient.addColorStop(0.3, `rgba(64, 156, 255, ${0.7 - i * 0.1})`);
+          gradient.addColorStop(0.6, `rgba(120, 184, 255, ${0.5 - i * 0.08})`);
+          gradient.addColorStop(1, `rgba(0, 122, 255, ${0.2 - i * 0.05})`);
         } else if (type === 'processing') {
-          gradient.addColorStop(0, 'rgba(175, 82, 222, 0.8)');
-          gradient.addColorStop(0.5, 'rgba(255, 45, 85, 0.6)');
-          gradient.addColorStop(1, 'rgba(175, 82, 222, 0.2)');
+          // Purple-pink spectrum for processing
+          gradient.addColorStop(0, `rgba(175, 82, 222, ${0.9 - i * 0.1})`);
+          gradient.addColorStop(0.3, `rgba(255, 45, 85, ${0.7 - i * 0.1})`);
+          gradient.addColorStop(0.6, `rgba(255, 107, 107, ${0.5 - i * 0.08})`);
+          gradient.addColorStop(1, `rgba(175, 82, 222, ${0.2 - i * 0.05})`);
         } else {
-          gradient.addColorStop(0, 'rgba(52, 199, 89, 0.8)');
-          gradient.addColorStop(0.5, 'rgba(0, 122, 255, 0.6)');
-          gradient.addColorStop(1, 'rgba(52, 199, 89, 0.2)');
+          // Green-blue spectrum for speaking
+          gradient.addColorStop(0, `rgba(52, 199, 89, ${0.9 - i * 0.1})`);
+          gradient.addColorStop(0.3, `rgba(0, 122, 255, ${0.7 - i * 0.1})`);
+          gradient.addColorStop(0.6, `rgba(100, 210, 255, ${0.5 - i * 0.08})`);
+          gradient.addColorStop(1, `rgba(52, 199, 89, ${0.2 - i * 0.05})`);
         }
 
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2 - i * 0.2;
+        ctx.lineWidth = 3 - i * 0.3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.stroke();
+
+        // Add inner glow effect
+        if (i === 0) {
+          ctx.globalAlpha = 0.3;
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 6;
+          ctx.stroke();
+        }
       }
 
-      time += 1;
+      time += 0.8;
       animationRef.current = requestAnimationFrame(animate);
     };
 
@@ -114,11 +144,11 @@ const SiriWaveform: React.FC<SiriWaveformProps> = ({ isActive, type }) => {
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <canvas
         ref={canvasRef}
-        className="opacity-70"
+        className="opacity-80"
         style={{
-          width: '160px',
-          height: '160px',
-          filter: 'blur(0.5px)',
+          width: '192px',
+          height: '192px',
+          filter: 'blur(0.3px)',
         }}
       />
     </div>

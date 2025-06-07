@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,9 +24,11 @@ const VoiceAssistant = () => {
   const [elevenLabsKey, setElevenLabsKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [isTTSEnabled, setIsTTSEnabled] = useState(true);
   
   const recognition = useRef<SpeechRecognition | null>(null);
   const synthesis = useRef<SpeechSynthesis | null>(null);
+  const currentAudio = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const QWEN_API_KEY = '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';
@@ -85,6 +87,17 @@ const VoiceAssistant = () => {
       recognition.current.stop();
       setIsListening(false);
     }
+  };
+
+  const stopSpeaking = () => {
+    if (currentAudio.current) {
+      currentAudio.current.pause();
+      currentAudio.current = null;
+    }
+    if (synthesis.current) {
+      synthesis.current.cancel();
+    }
+    setIsSpeaking(false);
   };
 
   const shouldGenerateImage = (text: string): boolean => {
@@ -190,11 +203,13 @@ const VoiceAssistant = () => {
 
       setMessages(prev => [...prev, aiMessage]);
       
-      // Speak the response
-      if (elevenLabsKey) {
-        await speakWithElevenLabs(aiResponse);
-      } else {
-        speakWithBrowserTTS(aiResponse);
+      // Speak the response only if TTS is enabled
+      if (isTTSEnabled) {
+        if (elevenLabsKey) {
+          await speakWithElevenLabs(aiResponse);
+        } else {
+          speakWithBrowserTTS(aiResponse);
+        }
       }
 
     } catch (error) {
@@ -245,10 +260,12 @@ const VoiceAssistant = () => {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
+      currentAudio.current = audio;
       
       audio.onended = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl);
+        currentAudio.current = null;
       };
       
       await audio.play();
@@ -344,7 +361,7 @@ const VoiceAssistant = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.15),transparent_50%)]" />
       
       <div className="relative z-10 flex flex-col h-screen">
-        {/* Minimal Header */}
+        {/* Enhanced Header with Controls */}
         <div className="p-6 flex items-center justify-between backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
@@ -353,6 +370,32 @@ const VoiceAssistant = () => {
             <h1 className="text-lg font-medium text-white/90">AI Assistant</h1>
           </div>
           <div className="flex items-center gap-2">
+            {/* TTS Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsTTSEnabled(!isTTSEnabled)}
+              className={`rounded-full p-2 transition-all duration-300 ${
+                isTTSEnabled 
+                  ? 'text-white/90 hover:text-white hover:bg-white/10' 
+                  : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+              }`}
+            >
+              {isTTSEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+            
+            {/* Stop Speaking Button */}
+            {isSpeaking && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={stopSpeaking}
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full p-2 animate-pulse"
+              >
+                <Square className="w-5 h-5" />
+              </Button>
+            )}
+            
             {messages.length > 1 && (
               <Button
                 variant="ghost"
@@ -374,43 +417,51 @@ const VoiceAssistant = () => {
           </div>
         </div>
 
-        {/* Main Siri Interface */}
+        {/* Enhanced Main Siri Interface */}
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="text-center space-y-12 max-w-lg w-full">
-            {/* Main Siri Orb */}
+            {/* Enhanced Siri Orb with iPhone-like animations */}
             <div className="relative flex items-center justify-center">
               <div 
-                className={`relative w-40 h-40 rounded-full transition-all duration-700 cursor-pointer ${
+                className={`relative w-48 h-48 rounded-full transition-all duration-700 cursor-pointer transform ${
                   isListening 
-                    ? 'bg-gradient-to-br from-blue-400/30 to-purple-500/30 scale-110 shadow-2xl shadow-blue-500/30' 
+                    ? 'bg-gradient-to-br from-blue-400/40 to-purple-500/40 scale-110 shadow-2xl shadow-blue-500/40 animate-pulse' 
                     : isProcessing
-                    ? 'bg-gradient-to-br from-purple-400/30 to-pink-500/30 scale-105 shadow-xl shadow-purple-500/20'
+                    ? 'bg-gradient-to-br from-purple-400/40 to-pink-500/40 scale-105 shadow-xl shadow-purple-500/30'
                     : isSpeaking
-                    ? 'bg-gradient-to-br from-green-400/30 to-blue-500/30 scale-105 shadow-xl shadow-green-500/20'
-                    : 'bg-white/5 hover:bg-white/10 hover:scale-105 shadow-lg'
-                } backdrop-blur-xl border border-white/20`}
+                    ? 'bg-gradient-to-br from-green-400/40 to-blue-500/40 scale-105 shadow-xl shadow-green-500/30'
+                    : 'bg-white/8 hover:bg-white/12 hover:scale-105 shadow-lg hover:shadow-xl'
+                } backdrop-blur-xl border border-white/30`}
                 onClick={isListening ? stopListening : startListening}
               >
-                {/* Inner glow effect */}
-                <div className={`absolute inset-2 rounded-full transition-all duration-500 ${
+                {/* Enhanced inner glow with multiple layers */}
+                <div className={`absolute inset-3 rounded-full transition-all duration-500 ${
                   isListening || isProcessing || isSpeaking 
-                    ? 'bg-gradient-to-br from-white/20 to-white/5' 
-                    : 'bg-white/5'
+                    ? 'bg-gradient-to-br from-white/30 to-white/10 shadow-inner' 
+                    : 'bg-white/8'
                 } backdrop-blur-sm`} />
                 
-                {/* Icon */}
+                <div className={`absolute inset-6 rounded-full transition-all duration-700 ${
+                  isListening || isProcessing || isSpeaking 
+                    ? 'bg-gradient-to-br from-white/20 to-transparent animate-pulse' 
+                    : 'bg-white/5'
+                }`} />
+                
+                {/* Enhanced Icon with better positioning */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {isListening ? (
-                    <div className="relative">
-                      <MicOff className="w-12 h-12 text-white drop-shadow-lg" />
-                      <div className="absolute inset-0 bg-red-500/20 rounded-full animate-pulse" />
+                    <div className="relative animate-pulse">
+                      <MicOff className="w-16 h-16 text-white drop-shadow-2xl" />
+                      <div className="absolute inset-0 bg-red-500/30 rounded-full animate-ping" />
                     </div>
                   ) : (
-                    <Mic className="w-12 h-12 text-white/90 drop-shadow-lg" />
+                    <Mic className={`w-16 h-16 text-white/95 drop-shadow-2xl transition-all duration-300 ${
+                      !isListening && !isProcessing && !isSpeaking ? 'hover:scale-110' : ''
+                    }`} />
                   )}
                 </div>
                 
-                {/* Animated Waveform */}
+                {/* Enhanced Animated Waveform */}
                 {(isListening || isProcessing || isSpeaking) && (
                   <div className="absolute inset-0">
                     <SiriWaveform 
@@ -422,24 +473,45 @@ const VoiceAssistant = () => {
               </div>
             </div>
 
-            {/* Status Text */}
-            <div className="space-y-4">
-              <div className="text-center min-h-[2rem]">
+            {/* Enhanced Status Text with animations */}
+            <div className="space-y-6">
+              <div className="text-center min-h-[3rem] flex items-center justify-center">
                 {isListening && (
-                  <p className="text-white text-xl font-light animate-pulse">Listening...</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                    <p className="text-white text-2xl font-light">Listening...</p>
+                  </div>
                 )}
                 {isProcessing && (
-                  <p className="text-white/90 text-xl font-light">Thinking...</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                    </div>
+                    <p className="text-white/90 text-2xl font-light">Thinking...</p>
+                  </div>
                 )}
                 {isSpeaking && (
-                  <p className="text-white/90 text-xl font-light">Speaking...</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-ping" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-ping" style={{ animationDelay: '100ms' }}></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-ping" style={{ animationDelay: '200ms' }}></div>
+                    </div>
+                    <p className="text-white/90 text-2xl font-light">Speaking...</p>
+                  </div>
                 )}
                 {!isListening && !isProcessing && !isSpeaking && (
-                  <p className="text-white/60 text-lg font-light">Tap to speak or type below</p>
+                  <p className="text-white/60 text-xl font-light animate-fade-in">Tap to speak or type below</p>
                 )}
               </div>
 
-              {/* Text Input */}
+              {/* Enhanced Text Input */}
               <form onSubmit={handleTextSubmit} className="max-w-sm mx-auto">
                 <div className="relative">
                   <Input
@@ -448,13 +520,13 @@ const VoiceAssistant = () => {
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
                     disabled={isProcessing || isSpeaking}
-                    className="bg-white/10 border-white/20 text-white placeholder-white/50 rounded-full py-3 px-6 backdrop-blur-sm text-center focus:bg-white/15 focus:border-white/30 transition-all duration-300"
+                    className="bg-white/10 border-white/30 text-white placeholder-white/50 rounded-full py-4 px-8 backdrop-blur-sm text-center focus:bg-white/15 focus:border-white/40 transition-all duration-300 text-lg shadow-lg"
                   />
                   {textInput && (
                     <Button
                       type="submit"
                       disabled={!textInput.trim() || isProcessing || isSpeaking}
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full w-8 h-8 p-0 text-xs"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full w-10 h-10 p-0 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       →
                     </Button>
@@ -467,7 +539,7 @@ const VoiceAssistant = () => {
 
         {/* Messages Panel */}
         {showMessages && messages.length > 1 && (
-          <div className="backdrop-blur-xl bg-black/20 border-t border-white/10 max-h-80 overflow-hidden">
+          <div className="backdrop-blur-xl bg-black/20 border-t border-white/10 max-h-80 overflow-hidden animate-slide-in-right">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white/90 font-medium">Conversation</h3>
