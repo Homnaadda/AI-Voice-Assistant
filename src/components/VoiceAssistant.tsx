@@ -27,7 +27,7 @@ const VoiceAssistant = () => {
   const synthesis = useRef<SpeechSynthesis | null>(null);
   const { toast } = useToast();
 
-  const QWEN_API_KEY = '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';
+  const QWEN_API_KEY = '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';
 
   useEffect(() => {
     // Initialize speech recognition
@@ -64,7 +64,7 @@ const VoiceAssistant = () => {
     // Add welcome message
     const welcomeMessage: Message = {
       id: '1',
-      text: "Hello! I'm your AI voice assistant powered by Qwen 3. You can speak to me or type your questions. How can I help you today?",
+      text: "Hello! I'm your AI voice assistant powered by Qwen3 235B. You can speak to me or type your questions. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     };
@@ -104,11 +104,11 @@ const VoiceAssistant = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'qwen/qwen-2.5-7b-instruct',
+          model: 'qwen/qwen-2.5-coder-32b-instruct',
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful AI voice assistant. Provide concise, friendly, and informative responses. Keep your answers clear and conversational since they will be spoken aloud.'
+              content: 'You are a helpful AI voice assistant powered by Qwen3 235B. Provide concise, friendly, and informative responses. Keep your answers clear and conversational since they will be spoken aloud.'
             },
             {
               role: 'user',
@@ -294,7 +294,7 @@ const VoiceAssistant = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">AI Voice Assistant</h1>
-              <p className="text-sm text-gray-400">Powered by Qwen 3</p>
+              <p className="text-sm text-gray-400">Powered by Qwen3 235B</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
