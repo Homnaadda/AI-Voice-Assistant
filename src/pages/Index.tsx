@@ -9,8 +9,12 @@ const Index = () => {
     setShowAssistant(true);
   };
 
+  const handleBack = () => {
+    setShowAssistant(false);
+  };
+
   if (showAssistant) {
-    return <VoiceAssistant />;
+    return <VoiceAssistant onBack={handleBack} />;
   }
 
   return <LandingPage onGetStarted={handleGetStarted} />;

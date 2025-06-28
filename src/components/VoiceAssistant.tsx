@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,11 @@ interface Message {
   imageUrl?: string;
 }
 
-const VoiceAssistant = () => {
+interface VoiceAssistantProps {
+  onBack?: () => void;
+}
+
+const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -450,9 +454,20 @@ const VoiceAssistant = () => {
           </div>
         )}
 
-        {/* Minimal iPhone-style header */}
+        {/* Enhanced iPhone-style header with back button */}
         <div className="p-6 flex items-center justify-between backdrop-blur-sm">
           <div className="flex items-center gap-3">
+            {/* Back button */}
+            {onBack && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-3 transition-all duration-300 mr-2"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
             <div className="w-2 h-2 bg-white/60 rounded-full"></div>
             <div className="w-2 h-2 bg-white/40 rounded-full"></div>
             <div className="w-2 h-2 bg-white/20 rounded-full"></div>
