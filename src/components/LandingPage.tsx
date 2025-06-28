@@ -91,7 +91,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   <div className="text-white/60 text-sm">Accuracy Rate</div>
                 </div>
                 <div className="text-center space-y-2">
-                  <div className="text-3xl md:text-4xl font-light text-white"><1s</div>
+                  <div className="text-3xl md:text-4xl font-light text-white">&lt;1s</div>
                   <div className="text-white/60 text-sm">Response Time</div>
                 </div>
                 <div className="text-center space-y-2">
