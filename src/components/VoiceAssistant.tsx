@@ -454,7 +454,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
           </div>
         )}
 
-        {/* Enhanced iPhone-style header with back button */}
+        {/* Clean header without logo */}
         <div className="p-6 flex items-center justify-between backdrop-blur-sm">
           <div className="flex items-center gap-3">
             {/* Back button */}
@@ -463,14 +463,11 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-3 transition-all duration-300 mr-2"
+                className="text-white/60 hover:text-white hover:bg-white/10 rounded-full p-3 transition-all duration-300"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
-            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-            <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-            <div className="w-2 h-2 bg-white/20 rounded-full"></div>
           </div>
           <div className="flex items-center gap-3">
             {/* TTS Toggle with iPhone-style design */}
