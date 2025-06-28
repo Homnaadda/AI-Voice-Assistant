@@ -18,9 +18,10 @@ interface Message {
 
 interface VoiceAssistantProps {
   onBack?: () => void;
+  onLogout?: () => void;
 }
 
-const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
+const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack, onLogout }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -115,6 +116,10 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
+      // Call the onLogout callback to redirect to landing page
+      if (onLogout) {
+        onLogout();
+      }
     } catch (error) {
       toast({
         title: "Error",

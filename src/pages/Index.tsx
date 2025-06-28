@@ -53,6 +53,11 @@ const Index = () => {
     setCurrentView('landing');
   };
 
+  // Handle logout - redirect to landing page
+  const handleLogout = () => {
+    setCurrentView('landing');
+  };
+
   switch (currentView) {
     case 'signin':
       return (
@@ -73,7 +78,12 @@ const Index = () => {
       );
     
     case 'assistant':
-      return <VoiceAssistant onBack={user ? undefined : handleBackToLanding} />;
+      return (
+        <VoiceAssistant 
+          onBack={user ? undefined : handleBackToLanding} 
+          onLogout={handleLogout}
+        />
+      );
     
     default:
       return <LandingPage onGetStarted={handleGetStarted} />;
