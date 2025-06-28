@@ -35,11 +35,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         {/* Header */}
         <header className="px-6 py-8">
           <nav className="flex items-center justify-between max-w-7xl mx-auto">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-white text-xl font-light tracking-wide">AI Assistant</span>
+            </div>
+            <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-white/70 hover:text-white transition-colors">Features</a>
               <a href="#how-it-works" className="text-white/70 hover:text-white transition-colors">How it works</a>
-            </div>
-            <div className="flex items-center gap-6">
               <Button 
                 onClick={onGetStarted}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full px-6"
