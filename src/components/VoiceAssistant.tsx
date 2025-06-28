@@ -50,9 +50,36 @@ const VoiceAssistant = () => {
       recognition.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        
+        let errorMessage = "Could not understand speech. Please try again.";
+        
+        // Provide specific error messages based on the error type
+        switch (event.error) {
+          case 'no-speech':
+            errorMessage = "No speech detected. Please ensure your microphone is working and try again.";
+            break;
+          case 'audio-capture':
+            errorMessage = "Microphone access denied or not available. Please check your microphone permissions.";
+            break;
+          case 'not-allowed':
+            errorMessage = "Microphone permission denied. Please allow microphone access and try again.";
+            break;
+          case 'network':
+            errorMessage = "Network error occurred. Please check your internet connection and try again.";
+            break;
+          case 'aborted':
+            errorMessage = "Speech recognition was cancelled.";
+            break;
+          case 'bad-grammar':
+            errorMessage = "Speech recognition configuration error. Please try again.";
+            break;
+          default:
+            errorMessage = `Speech recognition error: ${event.error}. Please try again.`;
+        }
+        
         toast({
           title: "Speech Recognition Error",
-          description: "Could not understand speech. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
       };
