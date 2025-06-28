@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Settings, MessageSquare, Square, ChevronDown, ChevronUp, ArrowLeft, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import ChatMessage from './ChatMessage';
 import SiriWaveform from './SiriWaveform';
 
@@ -34,6 +35,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
   const synthesis = useRef<SpeechSynthesis | null>(null);
   const currentAudio = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
 
   const QWEN_API_KEY = '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';
 
@@ -99,12 +101,28 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
     // Add welcome message
     const welcomeMessage: Message = {
       id: '1',
-      text: "Hi there! I'm your AI assistant. How can I help you today?",
+      text: user ? `Hi ${user.user_metadata?.first_name || 'there'}! I'm your AI assistant. How can I help you today?` : "Hi there! I'm your AI assistant. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     };
     setMessages([welcomeMessage]);
-  }, []);
+  }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const startListening = () => {
     if (recognition.current && !isListening) {
@@ -454,7 +472,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
           </div>
         )}
 
-        {/* Enhanced iPhone-style header with back button */}
+        {/* Enhanced iPhone-style header with back button and logout */}
         <div className="p-6 flex items-center justify-between backdrop-blur-sm">
           <div className="flex items-center gap-3">
             {/* Back button */}
@@ -473,6 +491,29 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
             <div className="w-2 h-2 bg-white/20 rounded-full"></div>
           </div>
           <div className="flex items-center gap-3">
+            {/* User info and logout button */}
+            {user && (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-white/90 text-sm font-medium">
+                    {user.user_metadata?.first_name || user.email?.split('@')[0] || 'User'}
+                  </div>
+                  <div className="text-white/50 text-xs">
+                    {user.email}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-full p-3 transition-all duration-300"
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </div>
+            )}
+            
             {/* TTS Toggle with iPhone-style design */}
             <Button
               variant="ghost"
@@ -603,7 +644,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ onBack }) => {
                 {isListening && (
                   <div className="flex items-center gap-4">
                     <div className="flex space-x-2">
-                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce\" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                       <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                       <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
